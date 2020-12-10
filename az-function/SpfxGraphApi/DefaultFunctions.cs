@@ -21,8 +21,7 @@ namespace SpfxGraphApi
         }
 
         [FunctionName("SaveMail")]
-        public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "SaveMail/{tenantId}/{mailId}")] HttpRequestMessage request, string tenantId, string mailId,
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "SaveMail/{tenantId}/{mailId}")] HttpRequestMessage request, string tenantId, string mailId,
             ILogger log)
         {
             var accessToken = request.Headers.Authorization.Parameter;
@@ -47,17 +46,10 @@ namespace SpfxGraphApi
             var authProvider = new DelegateAuthenticationProvider(
                     async (requestMessage) =>
                     {
-                        try
-                        {
-                            var tokenResult = await confidentialClientApplication.AcquireTokenOnBehalfOf(new string[] { "https://graph.microsoft.com/.default" }, userAssertion).ExecuteAsync().ConfigureAwait(false);
+                        var tokenResult = await confidentialClientApplication.AcquireTokenOnBehalfOf(new string[] { "https://graph.microsoft.com/.default" }, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
-                            requestMessage.Headers.Authorization =
-                                new AuthenticationHeaderValue("Bearer", tokenResult.AccessToken);
-                        }
-                        catch(Exception ex)
-                        {
-
-                        }
+                        requestMessage.Headers.Authorization =
+                            new AuthenticationHeaderValue("Bearer", tokenResult.AccessToken);
                     });
 
             return new GraphServiceClient(authProvider);
